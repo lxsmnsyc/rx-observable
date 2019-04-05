@@ -46,12 +46,13 @@ export function onNextHandler(value) {
   }
   try {
     if (value == null) {
-      onError('onNext called with null value.');
+      throw new Error('onNext called with null value.');
     } else {
       onNext(value);
     }
   } catch (e) {
     onError(e);
+    controller.abort();
   }
 }
 /**
