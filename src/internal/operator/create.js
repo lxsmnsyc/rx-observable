@@ -15,13 +15,13 @@ function subscribeActual(observer) {
 
   const emitter = new AbortController();
   emitter.onComplete = onCompleteHandler.bind(this);
-  emitter.onNext = onNextHandler.bind(this);
   emitter.onError = onErrorHandler.bind(this);
+  emitter.onNext = onNextHandler.bind(this);
 
   this.controller = emitter;
   this.onComplete = onComplete;
-  this.onNext = onNext;
   this.onError = onError;
+  this.onNext = onNext;
 
   onSubscribe(emitter);
 
