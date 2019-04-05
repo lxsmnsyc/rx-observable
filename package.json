@@ -1,0 +1,45 @@
+{
+  "name": "rx-observable",
+  "version": "0.1.0",
+  "description": "Reactive Extensions - the non-backpressured, optionally multi-valued base reactive class that offers factory methods, intermediate operators and the ability to consume synchronous and/or asynchronous reactive dataflows.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LXSMNSYC/rx-observable.git"
+  },
+  "keywords": [
+    "reactivex",
+    "rx",
+    "rxjs",
+    "observable",
+    "reactive-extensions"
+  ],
+  "author": "LXSMNSYC (alexis.munsayac@gmail.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/LXSMNSYC/rx-observable/issues"
+  },
+  "homepage": "https://github.com/LXSMNSYC/rx-observable#readme",
+  "devDependencies": {
+    "@babel/core": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
+    "@babel/register": "^7.4.0",
+    "esdoc": "^1.1.0",
+    "esdoc-inject-style-plugin": "^1.0.0",
+    "esdoc-integrate-test-plugin": "^1.0.0",
+    "esdoc-standard-plugin": "^1.0.0",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.16.0",
+    "mocha": "^6.0.2",
+    "nyc": "^13.3.0",
+    "rollup": "^1.8.0",
+    "terser": "^3.17.0"
+  },
+  "dependencies": {
+    "abort-controller": "^3.0.0"
+  }
+}
