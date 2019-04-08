@@ -30,10 +30,10 @@ function subscribeActual(observer) {
 }
 
 export default (amount) => {
-  if (isNumber(amount)) {
+  if (!isNumber(amount)) {
     return error(new Error('Observable.timer: "amount" is not a number.'));
   }
   const observable = new Observable(subscribeActual);
-  observable.amount = observable;
+  observable.amount = amount;
   return observable;
 };
