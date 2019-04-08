@@ -26,6 +26,7 @@ function subscribeActual(observer) {
   }, amount);
 
   signal.addEventListener('abort', () => clearTimeout(timer));
+
   source.subscribeWith({
     onSubscribe(ac) {
       signal.addEventListener('abort', () => ac.abort());
