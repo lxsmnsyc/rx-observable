@@ -31,6 +31,10 @@ function subscribeActual(observer) {
     if (!(source instanceof Observable)) {
       onError(new Error('Observable.concatDelayError: one of the sources is a non-Observable.'));
       controller.abort();
+      return;
+    }
+    if (signal.aborted) {
+      return;
     }
     counter += 1;
     source.subscribeWith({
