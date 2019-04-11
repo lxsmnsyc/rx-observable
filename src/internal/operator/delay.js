@@ -1,4 +1,5 @@
 import AbortController from 'abort-controller';
+import Scheduler from 'rx-scheduler';
 import Observable from '../../observable';
 import { cleanObserver, isNumber } from '../utils';
 
@@ -10,7 +11,7 @@ function subscribeActual(observer) {
     onNext, onComplete, onError, onSubscribe,
   } = cleanObserver(observer);
 
-  const { amount, doDelayError } = this;
+  const { amount, scheduler, doDelayError } = this;
 
   const controller = new AbortController();
 
@@ -27,32 +28,32 @@ function subscribeActual(observer) {
       signal.addEventListener('abort', () => ac.abort());
     },
     onNext(x) {
-      const timeout = setTimeout(() => {
+      const ac = scheduler.delay(() => {
         onNext(x);
       }, amount);
 
       signal.addEventListener('abort', () => {
-        clearTimeout(timeout);
+        ac.abort();
       });
     },
     onComplete() {
-      const timeout = setTimeout(() => {
+      const ac = scheduler.delay(() => {
         onComplete();
         controller.abort();
       }, amount);
 
       signal.addEventListener('abort', () => {
-        clearTimeout(timeout);
+        ac.abort();
       });
     },
     onError(x) {
-      const timeout = setTimeout(() => {
+      const ac = scheduler.delay(() => {
         onError(x);
         controller.abort();
-      }, doDelayError ? 0 : amount);
+      }, doDelayError ? amount : 0);
 
       signal.addEventListener('abort', () => {
-        clearTimeout(timeout);
+        ac.abort();
       });
     },
   });
@@ -60,13 +61,18 @@ function subscribeActual(observer) {
 /**
  * @ignore
  */
-export default (source, amount, doDelayError) => {
+export default (source, amount, scheduler, doDelayError) => {
   if (!isNumber(amount)) {
     return source;
+  }
+  let sched = scheduler;
+  if (!(sched instanceof Scheduler.interface)) {
+    sched = Scheduler.current;
   }
   const observable = new Observable(subscribeActual);
   observable.source = source;
   observable.amount = amount;
+  observable.scheduler = sched;
   observable.doDelayError = doDelayError;
   return observable;
 };
