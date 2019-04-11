@@ -1,9 +1,12 @@
-/* eslint-disable no-restricted-syntax */
 import AbortController from 'abort-controller';
+import Scheduler from 'rx-scheduler';
 import Observable from '../../observable';
 import { cleanObserver, isNumber } from '../utils';
 import error from './error';
 
+/**
+ * @ignore
+ */
 function subscribeActual(observer) {
   const {
     onNext, onComplete, onSubscribe,
@@ -11,29 +14,35 @@ function subscribeActual(observer) {
 
   const controller = new AbortController();
 
-  const { amount } = this;
+  const { signal } = controller;
 
   onSubscribe(controller);
-
-  const { signal } = controller;
 
   if (signal.aborted) {
     return;
   }
 
-  const timer = setTimeout(() => {
+  const timeout = this.scheduler.delay(() => {
     onNext(0);
     onComplete();
-  }, amount);
+  }, this.amount);
 
-  signal.addEventListener('abort', () => clearTimeout(timer));
+  signal.addEventListener('abort', () => timeout.abort());
 }
-
-export default (amount) => {
+/**
+ * @ignore
+ */
+export default (amount, scheduler) => {
   if (!isNumber(amount)) {
     return error(new Error('Observable.timer: "amount" is not a number.'));
   }
+
+  let sched = scheduler;
+  if (!(sched instanceof Scheduler.interface)) {
+    sched = Scheduler.current;
+  }
   const observable = new Observable(subscribeActual);
   observable.amount = amount;
+  observable.scheduler = sched;
   return observable;
 };
