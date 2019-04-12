@@ -1,4 +1,3 @@
-import AbortController from 'abort-controller';
 import Scheduler from 'rx-scheduler';
 import Observable from '../../observable';
 import { cleanObserver, isNumber } from '../utils';
@@ -12,22 +11,10 @@ function subscribeActual(observer) {
     onNext, onComplete, onSubscribe,
   } = cleanObserver(observer);
 
-  const controller = new AbortController();
-
-  const { signal } = controller;
-
-  onSubscribe(controller);
-
-  if (signal.aborted) {
-    return;
-  }
-
-  const timeout = this.scheduler.delay(() => {
+  onSubscribe(this.scheduler.delay(() => {
     onNext(0);
     onComplete();
-  }, this.amount);
-
-  signal.addEventListener('abort', () => timeout.abort());
+  }, this.amount));
 }
 /**
  * @ignore
