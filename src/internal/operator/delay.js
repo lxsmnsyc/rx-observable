@@ -1,5 +1,5 @@
-import AbortController from 'abort-controller';
 import Scheduler from 'rx-scheduler';
+import { LinkedCancellable } from 'rx-cancellable';
 import Observable from '../../observable';
 import { cleanObserver, isNumber } from '../utils';
 
@@ -13,48 +13,29 @@ function subscribeActual(observer) {
 
   const { amount, scheduler, doDelayError } = this;
 
-  const controller = new AbortController();
-
-  const { signal } = controller;
+  const controller = new LinkedCancellable();
 
   onSubscribe(controller);
 
-  if (signal.aborted) {
-    return;
-  }
-
   this.source.subscribeWith({
     onSubscribe(ac) {
-      signal.addEventListener('abort', () => ac.abort());
+      controller.link(ac);
     },
     onNext(x) {
-      const ac = scheduler.delay(() => {
+      controller.link(scheduler.delay(() => {
+        controller.unlink();
         onNext(x);
-      }, amount);
-
-      signal.addEventListener('abort', () => {
-        ac.abort();
-      });
+      }, amount));
     },
     onComplete() {
-      const ac = scheduler.delay(() => {
+      controller.link(scheduler.delay(() => {
         onComplete();
-        controller.abort();
-      }, amount);
-
-      signal.addEventListener('abort', () => {
-        ac.abort();
-      });
+      }, amount));
     },
     onError(x) {
-      const ac = scheduler.delay(() => {
+      controller.link(scheduler.delay(() => {
         onError(x);
-        controller.abort();
-      }, doDelayError ? amount : 0);
-
-      signal.addEventListener('abort', () => {
-        ac.abort();
-      });
+      }, doDelayError ? amount : 0));
     },
   });
 }
