@@ -1,4 +1,4 @@
-import AbortController from 'abort-controller';
+import { LinkedCancellable } from 'rx-cancellable';
 import Observable from '../../observable';
 import { isNumber, cleanObserver } from '../utils';
 
@@ -8,15 +8,9 @@ function subscribeActual(observer) {
     onSubscribe, onNext, onError, onComplete,
   } = cleanObserver(observer);
 
-  const controller = new AbortController();
+  const controller = new LinkedCancellable();
 
   onSubscribe(controller);
-
-  const { signal } = controller;
-
-  if (signal.aborted) {
-    return;
-  }
 
   const { source, amount } = this;
 
@@ -24,16 +18,10 @@ function subscribeActual(observer) {
 
   source.subscribeWith({
     onSubscribe(ac) {
-      signal.addEventListener('abort', () => ac.abort());
+      controller.link(ac);
     },
-    onComplete() {
-      onComplete();
-      controller.abort();
-    },
-    onError(x) {
-      onError(x);
-      controller.abort();
-    },
+    onComplete,
+    onError,
     onNext(x) {
       if (count <= amount) {
         count += 1;
@@ -43,7 +31,9 @@ function subscribeActual(observer) {
     },
   });
 }
-
+/**
+ * @ignore
+ */
 export default (source, amount) => {
   if (!isNumber(amount)) {
     return source;
