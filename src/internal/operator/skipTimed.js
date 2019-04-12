@@ -1,4 +1,5 @@
-import AbortController from 'abort-controller';
+import { LinkedCancellable } from 'rx-cancellable';
+import Scheduler from 'rx-scheduler';
 import Observable from '../../observable';
 import { isNumber, cleanObserver } from '../utils';
 
@@ -8,52 +9,41 @@ function subscribeActual(observer) {
     onSubscribe, onNext, onError, onComplete,
   } = cleanObserver(observer);
 
-  const controller = new AbortController();
+  const controller = new LinkedCancellable();
 
   onSubscribe(controller);
 
-  const { signal } = controller;
+  const { source, amount, schedule } = this;
 
-  if (signal.aborted) {
-    return;
-  }
+  const timeout = schedule.delay(() => {}, amount);
 
-  const { source, amount } = this;
-
-  let expired = false;
-
-  const timer = setTimeout(() => {
-    expired = true;
-  }, amount);
-
-  signal.addEventListener('abort', () => clearTimeout(timer));
+  controller.addEventListener('cancel', () => timeout.cancel());
 
   source.subscribeWith({
     onSubscribe(ac) {
-      signal.addEventListener('abort', () => ac.abort());
+      controller.link(ac);
     },
-    onComplete() {
-      onComplete();
-      controller.abort();
-    },
-    onError(x) {
-      onError(x);
-      controller.abort();
-    },
+    onComplete,
+    onError,
     onNext(x) {
-      if (expired) {
+      if (timeout.cancelled) {
         onNext(x);
       }
     },
   });
 }
 
-export default (source, amount) => {
+export default (source, amount, scheduler) => {
   if (!isNumber(amount)) {
     return source;
+  }
+  let sched = scheduler;
+  if (!(sched instanceof Scheduler.interface)) {
+    sched = Scheduler.current;
   }
   const observable = new Observable(subscribeActual);
   observable.amount = amount;
   observable.source = source;
+  observable.scheduler = sched;
   return observable;
 };
