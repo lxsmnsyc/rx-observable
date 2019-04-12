@@ -1,4 +1,4 @@
-import AbortController from 'abort-controller';
+import { LinkedCancellable } from 'rx-cancellable';
 import Observable from '../../observable';
 import { isNumber, cleanObserver } from '../utils';
 
@@ -8,7 +8,7 @@ function subscribeActual(observer) {
     onSubscribe, onNext, onError, onComplete,
   } = cleanObserver(observer);
 
-  const controller = new AbortController();
+  const controller = new LinkedCancellable();
 
   onSubscribe(controller);
 
@@ -24,7 +24,7 @@ function subscribeActual(observer) {
 
   source.subscribeWith({
     onSubscribe(ac) {
-      signal.addEventListener('abort', () => ac.abort());
+      controller.link(ac);
     },
     onComplete() {
       // eslint-disable-next-line no-restricted-syntax
@@ -32,12 +32,9 @@ function subscribeActual(observer) {
         onNext(i);
       }
       onComplete();
-      controller.abort();
+      controller.cancel();
     },
-    onError(x) {
-      onError(x);
-      controller.abort();
-    },
+    onError,
     onNext(x) {
       buffer.push(x);
       if (buffer.length > amount) {
