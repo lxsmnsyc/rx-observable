@@ -1,24 +1,12 @@
 /* eslint-disable class-methods-use-this */
+import { UNCANCELLED } from 'rx-cancellable';
 import Observable from '../../observable';
-
-const SIGNAL = {
-  aborted: false,
-  addEventListener: () => {},
-  removeEventListener: () => {},
-  onabort: () => {},
-};
-
-
-const CONTROLLER = {
-  signal: SIGNAL,
-  abort: () => {},
-};
 
 /**
  * @ignore
  */
 function subscribeActual(observer) {
-  observer.onSubscribe(CONTROLLER);
+  observer.onSubscribe(UNCANCELLED);
 }
 /**
  * @ignore
@@ -30,7 +18,6 @@ let INSTANCE;
 export default () => {
   if (typeof INSTANCE === 'undefined') {
     INSTANCE = new Observable(subscribeActual);
-    INSTANCE.subscribeActual = subscribeActual.bind(INSTANCE);
   }
   return INSTANCE;
 };
