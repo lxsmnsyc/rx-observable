@@ -1,35 +1,132 @@
+import { Cancellable, BooleanCancellable } from 'rx-cancellable';
+
 /**
- * @interface
- * Represents an object that receives notification to
- * an Observer.
+ * @ignore
+ */
+const LINK = new WeakMap();
+/**
+ * Abstraction over an Observer that allows associating a resource with it.
  *
- * Emitter is an abstraction layer of the Observer
+ * The emitter allows the registration of a single resource, in the form of a
+ * Cancellable via setCancellable(Cancellable) respectively. The emitter
+ * implementations will cancel this instance when the downstream cancels
+ * the flow or after the event generator logic calls ObservableEmitter.onError(Error)
+ * or ObservableEmitter.onComplete() succeeds.
+ *
+ * Only one Cancellable object can be associated with the emitter at a time.
+ * Calling either set method will cancel any previous object. If there is a need
+ * for handling multiple resources, one can create a CompositeCancellable and
+ * associate that with the emitter instead.
  */
 // eslint-disable-next-line no-unused-vars
-export default class Emitter extends AbortController {
+export default class ObservableEmitter extends Cancellable {
+  constructor(next, complete, error) {
+    super();
+    /**
+     * @ignore
+     */
+    this.next = next;
+    /**
+     * @ignore
+     */
+    this.complete = complete;
+    /**
+     * @ignore
+     */
+    this.error = error;
+
+    LINK.set(this, new BooleanCancellable());
+  }
+
   /**
-   * Emits a value.
-   *
-   * Can be called multiple times until Emitter is aborted, has
-   * emitted an Error or is completed.
-   * @param {!any} value
-   * @abstract
+   * Returns true if the emitter is cancelled.
+   * @returns {boolean}
+   */
+  get cancelled() {
+    return LINK.get(this).cancelled;
+  }
+
+  /**
+   * Returns true if the emitter is cancelled successfully.
+   * @returns {boolean}
+   */
+  cancel() {
+    return LINK.get(this).cancel();
+  }
+
+  /**
+   * Set the given Cancellable as the Emitter's cancellable state.
+   * @param {Cancellable} cancellable
+   * The Cancellable instance
+   * @returns {boolean}
+   * Returns true if the cancellable is valid.
+   */
+  setCancellable(cancellable) {
+    if (cancellable instanceof Cancellable) {
+      if (this.cancelled) {
+        cancellable.cancel();
+      } else if (cancellable.cancelled) {
+        this.cancel();
+        return true;
+      } else {
+        const link = LINK.get(this);
+        LINK.set(this, cancellable);
+        link.cancel();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Emits a completion.
    */
   // eslint-disable-next-line class-methods-use-this, no-unused-vars
-  onSuccess(value) {}
+  onComplete() {
+    if (this.cancelled) {
+      return;
+    }
+    try {
+      this.complete();
+    } finally {
+      this.cancel();
+    }
+  }
+
+  /**
+   * Emits a value.
+   * @param {!any} value
+   */
+  // eslint-disable-next-line class-methods-use-this, no-unused-vars
+  onNext(value) {
+    if (this.cancelled) {
+      return;
+    }
+    if (typeof value === 'undefined') {
+      this.error(new Error('onNext called with a null value.'));
+      this.cancel();
+    } else {
+      this.next(value);
+    }
+  }
 
   /**
    * Emits an error value.
    * @param {!Error} err
-   * @abstract
    */
   // eslint-disable-next-line class-methods-use-this, no-unused-vars
-  onError(err) {}
-
-  /**
-   * Emits a completion
-   * @abstract
-   */
-  // eslint-disable-next-line class-methods-use-this, no-unused-vars
-  onComplete() {}
+  onError(err) {
+    let report = err;
+    if (!(err instanceof Error)) {
+      report = new Error('onError called with a non-Error value.');
+    }
+    if (this.cancelled) {
+      return;
+    }
+    try {
+      this.error(report);
+    } finally {
+      this.cancel();
+    }
+  }
 }
