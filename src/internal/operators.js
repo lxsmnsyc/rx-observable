@@ -2,6 +2,7 @@
 export { default as amb } from './operator/amb';
 export { default as ambWith } from './operator/ambWith';
 export { default as compose } from './operator/compose';
+export { default as concat } from './operator/concat';
 export { default as create } from './operator/create';
 export { default as defer } from './operator/defer';
 export { default as delay } from './operator/delay';
