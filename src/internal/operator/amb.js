@@ -1,6 +1,6 @@
 /* eslint-disable no-loop-func */
 /* eslint-disable no-restricted-syntax */
-import AbortController from 'abort-controller';
+import { CompositeCancellable } from 'rx-cancellable';
 import Observable from '../../observable';
 import { isIterable, cleanObserver } from '../utils';
 import error from './error';
@@ -13,73 +13,50 @@ function subscribeActual(observer) {
     onNext, onComplete, onError, onSubscribe,
   } = cleanObserver(observer);
 
-  const controller = new AbortController();
-
-  const { signal } = controller;
+  const controller = new CompositeCancellable();
 
   onSubscribe(controller);
-
-  if (signal.aborted) {
-    return;
-  }
 
   const { sources } = this;
 
   const controllers = [];
 
-  signal.addEventListener('abort', () => controllers.forEach(x => x[0].abort()));
-
   let winner;
 
-  for (const observable of sources) {
-    if (signal.aborted) {
-      return;
+  const clean = (o) => {
+    if (winner == null) {
+      winner = o;
+
+      const aborts = controllers.filter(x => x[1] !== o).map(x => x[0]);
+
+      for (const ac of aborts) {
+        ac.cancel();
+      }
     }
+  };
+
+  for (const observable of sources) {
     if (observable instanceof Observable) {
       observable.subscribeWith({
         onSubscribe(ac) {
           controllers.push([ac, observable]);
         },
         onComplete() {
-          if (winner == null) {
-            winner = observable;
-
-            const aborts = controllers.filter(x => x[1] !== observable).map(x => x[0]);
-
-            for (const ac of aborts) {
-              ac.abort();
-            }
-          }
+          clean();
           if (winner === observable) {
             onComplete();
-            controller.abort();
+            controller.cancel();
           }
         },
         onError(x) {
-          if (winner == null) {
-            winner = observable;
-
-            const aborts = controllers.filter(a => a[1] !== observable).map(a => a[0]);
-
-            for (const ac of aborts) {
-              ac.abort();
-            }
-          }
+          clean();
           if (winner === observable) {
             onError(x);
-            controller.abort();
+            controller.cancel();
           }
         },
         onNext(x) {
-          if (winner == null) {
-            winner = observable;
-
-            const aborts = controllers.filter(a => a[1] !== observable).map(a => a[0]);
-
-            for (const ac of aborts) {
-              ac.abort();
-            }
-          }
+          clean();
           if (winner === observable) {
             onNext(x);
           }
@@ -87,7 +64,7 @@ function subscribeActual(observer) {
       });
     } else {
       onError(new Error('Observable.amb: One of the sources is a non-Observable.'));
-      controller.abort();
+      controller.cancel();
       break;
     }
   }
