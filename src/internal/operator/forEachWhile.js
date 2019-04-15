@@ -5,12 +5,11 @@ import { isFunction } from '../utils';
  */
 export default (source, predicate) => {
   const controller = new LinkedCancellable();
-
   if (!isFunction(predicate)) {
     controller.cancel();
   } else {
     source.subscribeWith({
-      onSubcribe(ac) {
+      onSubscribe(ac) {
         controller.link(ac);
       },
       onComplete() {
