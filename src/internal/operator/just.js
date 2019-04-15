@@ -24,6 +24,9 @@ function subscribeActual(observer) {
       controller.cancel();
       return;
     }
+    if (controller.cancelled) {
+      return;
+    }
     onNext(x);
   }
   onComplete();
