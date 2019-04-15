@@ -23,6 +23,9 @@ function subscribeActual(observer) {
 
   const direction = step * sign(max - min);
   for (let i = min; (direction < 0 ? i >= max : i <= max); i += direction) {
+    if (controller.cancelled) {
+      return;
+    }
     onNext(i);
   }
   onComplete();
