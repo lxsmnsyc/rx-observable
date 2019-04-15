@@ -1,4 +1,5 @@
-import AbortController from 'abort-controller';
+import { BooleanCancellable } from "rx-cancellable";
+
 /**
  * @ignore
  */
@@ -41,7 +42,7 @@ export const isPromise = (obj) => {
  */
 export function onNextHandler(value) {
   const { onNext, onError, controller } = this;
-  if (controller.signal.aborted) {
+  if (controller.cancelled) {
     return;
   }
   try {
@@ -52,7 +53,7 @@ export function onNextHandler(value) {
     }
   } catch (e) {
     onError(e);
-    controller.abort();
+    controller.cancel();
   }
 }
 /**
@@ -60,13 +61,13 @@ export function onNextHandler(value) {
  */
 export function onCompleteHandler() {
   const { onComplete, controller } = this;
-  if (controller.signal.aborted) {
+  if (controller.cancelled) {
     return;
   }
   try {
     onComplete();
   } finally {
-    controller.abort();
+    controller.cancel();
   }
 }
 /**
@@ -78,14 +79,14 @@ export function onErrorHandler(err) {
   if (!(err instanceof Error)) {
     report = new Error('onError called with a non-Error value.');
   }
-  if (controller.signal.aborted) {
+  if (controller.cancelled) {
     return;
   }
 
   try {
     onError(report);
   } finally {
-    controller.abort();
+    controller.cancel();
   }
 }
 /**
@@ -101,9 +102,9 @@ const throwError = (x) => { throw x; };
  */
 export const cleanObserver = x => ({
   onSubscribe: x.onSubscribe,
-  onNext: isFunction(x.onNext) ? x.onNext : identity,
   onComplete: isFunction(x.onComplete) ? x.onComplete : identity,
   onError: isFunction(x.onError) ? x.onError : throwError,
+  onNext: isFunction(x.onNext) ? x.onNext : identity,
 });
 /**
  * @ignore
@@ -111,12 +112,12 @@ export const cleanObserver = x => ({
 export const immediateComplete = (o) => {
   // const disposable = new SimpleDisposable();
   const { onSubscribe, onComplete } = cleanObserver(o);
-  const controller = new AbortController();
+  const controller = new BooleanCancellable();
   onSubscribe(controller);
 
-  if (!controller.signal.aborted) {
+  if (!controller.cancelled) {
     onComplete();
-    controller.abort();
+    controller.cancel();
   }
 };
 /**
@@ -124,11 +125,11 @@ export const immediateComplete = (o) => {
  */
 export const immediateError = (o, x) => {
   const { onSubscribe, onError } = cleanObserver(o);
-  const controller = new AbortController();
+  const controller = new BooleanCancellable();
   onSubscribe(controller);
 
-  if (!controller.signal.aborted) {
+  if (!controller.cancelled) {
     onError(x);
-    controller.abort();
+    controller.cancel();
   }
 };
