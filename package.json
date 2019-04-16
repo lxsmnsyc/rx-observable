@@ -61,7 +61,7 @@
     "terser": "^3.17.0"
   },
   "dependencies": {
-    "rx-cancellable": "^0.2.0",
-    "rx-scheduler": "^0.2.3"
+    "rx-cancellable": "^0.3.0",
+    "rx-scheduler": "^0.2.4"
   }
 }
