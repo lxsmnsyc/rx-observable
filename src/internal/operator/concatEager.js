@@ -10,18 +10,12 @@ function subscribeActual(observer) {
     onSubscribe, onNext, onError, onComplete,
   } = cleanObserver(observer);
 
+  const { sources } = this;
+  const { length } = sources;
+
   const controller = new CompositeCancellable();
 
   onSubscribe(controller);
-
-  const { signal } = controller;
-
-  if (signal.aborted) {
-    return;
-  }
-
-  const { sources } = this;
-  const { length } = sources;
 
   let counter = 0;
 
