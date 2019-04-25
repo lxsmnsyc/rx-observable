@@ -1,7 +1,6 @@
-import Scheduler from 'rx-scheduler';
 import { LinkedCancellable } from 'rx-cancellable';
 import Observable from '../../observable';
-import { cleanObserver, isNumber } from '../utils';
+import { cleanObserver, isNumber, defaultScheduler } from '../utils';
 
 /**
  * @ignore
@@ -22,8 +21,9 @@ function subscribeActual(observer) {
       controller.link(ac);
     },
     onNext(x) {
+      const { linked } = controller;
       controller.link(scheduler.delay(() => {
-        controller.unlink();
+        controller.link(linked);
         onNext(x);
       }, amount));
     },
@@ -46,14 +46,10 @@ export default (source, amount, scheduler, doDelayError) => {
   if (!isNumber(amount)) {
     return source;
   }
-  let sched = scheduler;
-  if (!(sched instanceof Scheduler.interface)) {
-    sched = Scheduler.current;
-  }
   const observable = new Observable(subscribeActual);
   observable.source = source;
   observable.amount = amount;
-  observable.scheduler = sched;
+  observable.scheduler = defaultScheduler(scheduler);
   observable.doDelayError = doDelayError;
   return observable;
 };
