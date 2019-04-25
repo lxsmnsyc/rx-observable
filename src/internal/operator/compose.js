@@ -1,6 +1,6 @@
-import Observable from '../../observable';
 import error from './error';
 import { isFunction } from '../utils';
+import is from '../is';
 
 /**
  * @ignore
@@ -15,7 +15,7 @@ export default (source, transformer) => {
   try {
     result = transformer(source);
 
-    if (!(result instanceof Observable)) {
+    if (!is(result)) {
       throw new Error('Observable.compose: transformer returned a non-Observable.');
     }
   } catch (e) {
