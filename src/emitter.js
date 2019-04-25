@@ -1,9 +1,6 @@
 import { Cancellable, BooleanCancellable } from 'rx-cancellable';
+import { isOf, isNull } from './internal/utils';
 
-/**
- * @ignore
- */
-const LINK = new WeakMap();
 /**
  * Abstraction over an Observer that allows associating a resource with it.
  *
@@ -34,8 +31,10 @@ export default class ObservableEmitter extends Cancellable {
      * @ignore
      */
     this.error = error;
-
-    LINK.set(this, new BooleanCancellable());
+    /**
+     * @ignore
+     */
+    this.linked = new BooleanCancellable();
   }
 
   /**
@@ -43,7 +42,7 @@ export default class ObservableEmitter extends Cancellable {
    * @returns {boolean}
    */
   get cancelled() {
-    return LINK.get(this).cancelled;
+    return this.linked.cancelled;
   }
 
   /**
@@ -51,7 +50,7 @@ export default class ObservableEmitter extends Cancellable {
    * @returns {boolean}
    */
   cancel() {
-    return LINK.get(this).cancel();
+    return this.linked.cancel();
   }
 
   /**
@@ -62,16 +61,16 @@ export default class ObservableEmitter extends Cancellable {
    * Returns true if the cancellable is valid.
    */
   setCancellable(cancellable) {
-    if (cancellable instanceof Cancellable) {
+    if (isOf(cancellable, Cancellable)) {
       if (this.cancelled) {
         cancellable.cancel();
       } else if (cancellable.cancelled) {
         this.cancel();
         return true;
       } else {
-        const link = LINK.get(this);
-        LINK.set(this, cancellable);
-        link.cancel();
+        const { linked } = this;
+        this.linked = cancellable;
+        linked.cancel();
         return true;
       }
     }
@@ -102,7 +101,7 @@ export default class ObservableEmitter extends Cancellable {
     if (this.cancelled) {
       return;
     }
-    if (typeof value === 'undefined') {
+    if (isNull(value)) {
       this.error(new Error('onNext called with a null value.'));
       this.cancel();
     } else {
@@ -117,7 +116,7 @@ export default class ObservableEmitter extends Cancellable {
   // eslint-disable-next-line class-methods-use-this, no-unused-vars
   onError(err) {
     let report = err;
-    if (!(err instanceof Error)) {
+    if (!(isOf(err, Error))) {
       report = new Error('onError called with a non-Error value.');
     }
     if (this.cancelled) {
