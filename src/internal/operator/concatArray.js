@@ -10,16 +10,16 @@ function subscribeActual(observer) {
     onSubscribe, onNext, onError, onComplete,
   } = cleanObserver(observer);
 
-  const controller = new LinkedCancellable();
-
-  onSubscribe(controller);
-
   const { sources } = this;
   const { length } = sources;
 
   if (length === 0) {
     immediateError(observer, new Error('Completable.concatArray: sources Array is empty.'));
   } else {
+    const controller = new LinkedCancellable();
+
+    onSubscribe(controller);
+
     let counter = 0;
 
     const sub = () => {
