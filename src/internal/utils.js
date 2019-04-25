@@ -20,6 +20,22 @@ export const isObject = x => isType(x, 'object');
 /**
  * @ignore
  */
+export const isNull = x => x == null;
+/**
+ * @ignore
+ */
+export const exists = x => x != null;
+/**
+ * @ignore
+ */
+export const isOf = (x, y) => x instanceof y;
+/**
+ * @ignore
+ */
+export const isArray = x => isOf(x, Array);
+/**
+ * @ignore
+ */
 export const isIterable = obj => isObject(obj) && isFunction(obj[Symbol.iterator]);
 /**
  * @ignore
@@ -33,62 +49,10 @@ export const toCallable = x => () => x;
  * @ignore
  */
 export const isPromise = (obj) => {
-  if (obj == null) return false;
-  if (obj instanceof Promise) return true;
+  if (isNull(obj)) return false;
+  if (isOf(obj, Promise)) return true;
   return (isObject(obj) || isFunction(obj)) && isFunction(obj.then);
 };
-/**
- * @ignore
- */
-export function onNextHandler(value) {
-  const { onNext, onError, controller } = this;
-  if (controller.cancelled) {
-    return;
-  }
-  try {
-    if (value == null) {
-      throw new Error('onNext called with null value.');
-    } else {
-      onNext(value);
-    }
-  } catch (e) {
-    onError(e);
-    controller.cancel();
-  }
-}
-/**
- * @ignore
- */
-export function onCompleteHandler() {
-  const { onComplete, controller } = this;
-  if (controller.cancelled) {
-    return;
-  }
-  try {
-    onComplete();
-  } finally {
-    controller.cancel();
-  }
-}
-/**
- * @ignore
- */
-export function onErrorHandler(err) {
-  const { onError, controller } = this;
-  let report = err;
-  if (!(err instanceof Error)) {
-    report = new Error('onError called with a non-Error value.');
-  }
-  if (controller.cancelled) {
-    return;
-  }
-
-  try {
-    onError(report);
-  } finally {
-    controller.cancel();
-  }
-}
 /**
  * @ignore
  */
@@ -133,3 +97,12 @@ export const immediateError = (o, x) => {
     controller.cancel();
   }
 };
+
+/**
+ * @ignore
+ */
+export const defaultScheduler = sched => (
+  isOf(sched, Scheduler.interface)
+    ? sched
+    : Scheduler.current
+);
