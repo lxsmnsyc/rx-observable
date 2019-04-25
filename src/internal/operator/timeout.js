@@ -1,7 +1,6 @@
-import Scheduler from 'rx-scheduler';
 import { LinkedCancellable } from 'rx-cancellable';
 import Observable from '../../observable';
-import { cleanObserver, isNumber } from '../utils';
+import { cleanObserver, isNumber, defaultScheduler } from '../utils';
 
 /**
  * @ignore
@@ -48,13 +47,9 @@ export default (source, amount, scheduler) => {
   if (!isNumber(amount)) {
     return source;
   }
-  let sched = scheduler;
-  if (!(sched instanceof Scheduler.interface)) {
-    sched = Scheduler.current;
-  }
   const observable = new Observable(subscribeActual);
   observable.source = source;
   observable.amount = amount;
-  observable.scheduler = sched;
+  observable.scheduler = defaultScheduler(scheduler);
   return observable;
 };
