@@ -1,10 +1,5 @@
 import Observable from '../../observable';
-import { cleanObserver, isFunction } from '../utils';
-
-/**
- * @ignore
- */
-const defaultMapper = x => x;
+import { cleanObserver, isFunction, isNull } from '../utils';
 
 /**
  * @ignore
@@ -22,7 +17,7 @@ function subscribeActual(observer) {
       let result;
       try {
         result = mapper(x);
-        if (result == null) {
+        if (isNull(result)) {
           throw new Error('Observable.map: mapper function returned a null value.');
         }
       } catch (e) {
@@ -39,13 +34,11 @@ function subscribeActual(observer) {
  * @ignore
  */
 export default (source, mapper) => {
-  let ms = mapper;
   if (!isFunction(mapper)) {
-    ms = defaultMapper;
+    return source;
   }
-
   const observable = new Observable(subscribeActual);
   observable.source = source;
-  observable.mapper = ms;
+  observable.mapper = mapper;
   return observable;
 };
