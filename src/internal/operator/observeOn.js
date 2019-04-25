@@ -1,4 +1,3 @@
-import Scheduler from 'rx-scheduler';
 import { LinkedCancellable } from 'rx-cancellable';
 import Observable from '../../observable';
 import { cleanObserver, defaultScheduler } from '../utils';
