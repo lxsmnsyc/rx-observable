@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 import { BooleanCancellable } from 'rx-cancellable';
 import Observable from '../../observable';
-import { isIterable, cleanObserver } from '../utils';
+import { isIterable, cleanObserver, isNull } from '../utils';
 import error from './error';
 
 /**
@@ -21,7 +21,7 @@ function subscribeActual(observer) {
     if (controller.cancelled) {
       return;
     }
-    if (i == null) {
+    if (isNull(i)) {
       onError(new Error('Observable.fromIterable: one of the elements is a null value.'));
       controller.cancel();
       return;
