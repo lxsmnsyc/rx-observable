@@ -5,19 +5,13 @@ import Observable from '../../observable';
 /**
  * @ignore
  */
-function subscribeActual(observer) {
-  observer.onSubscribe(UNCANCELLED);
-}
-/**
- * @ignore
- */
 let INSTANCE;
 /**
  * @ignore
  */
 export default () => {
   if (typeof INSTANCE === 'undefined') {
-    INSTANCE = new Observable(subscribeActual);
+    INSTANCE = new Observable(observer => observer.onSubscribe(UNCANCELLED));
   }
   return INSTANCE;
 };
