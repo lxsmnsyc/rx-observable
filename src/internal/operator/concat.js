@@ -3,6 +3,7 @@ import { LinkedCancellable } from 'rx-cancellable';
 import Observable from '../../observable';
 import { cleanObserver, isIterable } from '../utils';
 import error from './error';
+import is from '../is';
 
 function subscribeActual(observer) {
   const {
@@ -14,28 +15,27 @@ function subscribeActual(observer) {
   onSubscribe(controller);
 
   const { sources } = this;
-  const { length } = sources;
-  let counter = 0;
+  const generate = sources[Symbol.iterator]();
 
   const sub = () => {
-    const source = sources[counter];
-    if (!(source instanceof Observable)) {
+    const { value, done } = generate.next();
+    if (!(is(value) || done)) {
       onError(new Error('Observable.concat: one of the sources is a non-Observable.'));
       controller.cancel();
       return;
     }
     controller.unlink();
-    counter += 1;
-    source.subscribeWith({
+    value.subscribeWith({
       onSubscribe(ac) {
         controller.link(ac);
       },
       onComplete() {
-        if (counter === length) {
+        if (done) {
           onComplete();
-        } else {
-          sub();
+          controller.cancel();
+          return;
         }
+        sub();
       },
       onError,
       onNext,
