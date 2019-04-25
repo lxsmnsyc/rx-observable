@@ -32,7 +32,6 @@ function subscribeActual(observer) {
             sub();
           } else {
             onComplete();
-            controller.cancel();
           }
         } else {
           sub();
