@@ -1,5 +1,5 @@
-import { BooleanCancellable } from "rx-cancellable";
-
+import { BooleanCancellable } from 'rx-cancellable';
+import Scheduler from 'rx-scheduler';
 /**
  * @ignore
  */
