@@ -1,5 +1,5 @@
 import Observable from '../../observable';
-import { cleanObserver, isFunction } from '../utils';
+import { cleanObserver, isFunction, exists } from '../utils';
 
 function subscribeActual(observer) {
   const {
@@ -20,7 +20,7 @@ function subscribeActual(observer) {
         onError([x, e]);
         return;
       }
-      if (result != null) {
+      if (exists(result)) {
         onNext(result);
       }
       onComplete();
