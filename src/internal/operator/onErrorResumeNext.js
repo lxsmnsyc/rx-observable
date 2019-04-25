@@ -1,6 +1,8 @@
 import { LinkedCancellable } from 'rx-cancellable';
 import Observable from '../../observable';
-import { cleanObserver, isFunction } from '../utils';
+import {
+  cleanObserver, isFunction, isNull, isOf,
+} from '../utils';
 
 function subscribeActual(observer) {
   const {
@@ -19,13 +21,12 @@ function subscribeActual(observer) {
     },
     onComplete,
     onError(x) {
-      controller.unlink();
       let result;
 
       if (isFunction(resumeIfError)) {
         try {
           result = resumeIfError(x);
-          if (result == null) {
+          if (isNull(result)) {
             throw new Error('Observable.onErrorResumeNext: returned an non-Observable.');
           }
         } catch (e) {
@@ -35,7 +36,7 @@ function subscribeActual(observer) {
       } else {
         result = resumeIfError;
       }
-
+      controller.unlink();
       result.subscribeWith({
         onSubscribe(ac) {
           controller.link(ac);
@@ -52,7 +53,7 @@ function subscribeActual(observer) {
  * @ignore
  */
 export default (source, resumeIfError) => {
-  if (!(isFunction(resumeIfError) || resumeIfError instanceof Observable)) {
+  if (!(isFunction(resumeIfError) || isOf(resumeIfError, Observable))) {
     return source;
   }
 
