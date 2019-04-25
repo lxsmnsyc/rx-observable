@@ -1,5 +1,5 @@
 import Observable from '../../observable';
-import { cleanObserver } from '../utils';
+import { cleanObserver, isNull } from '../utils';
 
 function subscribeActual(observer) {
   const { onNext, onComplete, onSubscribe } = cleanObserver(observer);
@@ -20,7 +20,7 @@ function subscribeActual(observer) {
  * @ignore
  */
 export default (source, item) => {
-  if (item == null) {
+  if (isNull(item)) {
     return source;
   }
 
