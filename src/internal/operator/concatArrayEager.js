@@ -11,22 +11,16 @@ function subscribeActual(observer) {
     onSubscribe, onNext, onError, onComplete,
   } = cleanObserver(observer);
 
-  const controller = new CompositeCancellable();
-
-  onSubscribe(controller);
-
-  const { signal } = controller;
-
-  if (signal.aborted) {
-    return;
-  }
-
   const { sources } = this;
   const { length } = sources;
 
   if (length === 0) {
     immediateError(observer, new Error('Completable.concatArray: sources Array is empty.'));
   } else {
+    const controller = new CompositeCancellable();
+
+    onSubscribe(controller);
+
     let counter = 0;
 
     const parentBuffer = [];
