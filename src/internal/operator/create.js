@@ -1,4 +1,4 @@
-import { cleanObserver } from '../utils';
+import { cleanObserver, isFunction } from '../utils';
 import Observable from '../../observable';
 import error from './error';
 import ObservableEmitter from '../../emitter';
@@ -25,7 +25,7 @@ function subscribeActual(observer) {
  * @ignore
  */
 export default (subscriber) => {
-  if (typeof subscriber !== 'function') {
+  if (!isFunction(subscriber)) {
     return error(new Error('Observable.create: There are no subscribers.'));
   }
   const observable = new Observable(subscribeActual);
