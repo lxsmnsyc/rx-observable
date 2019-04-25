@@ -1,5 +1,5 @@
 import Observable from '../../observable';
-import concat from './concat';
+import concatArray from './concatArray';
 /**
  * @ignore
  */
@@ -7,5 +7,5 @@ export default (source, other) => {
   if (!(other instanceof Observable)) {
     return source;
   }
-  return concat([source, other]);
+  return concatArray([source, other]);
 };
