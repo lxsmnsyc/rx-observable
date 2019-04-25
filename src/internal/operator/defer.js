@@ -1,5 +1,6 @@
 import Observable from '../../observable';
-import { immediateError, cleanObserver } from '../utils';
+import { immediateError, cleanObserver, exists } from '../utils';
+import is from '../is';
 
 /**
  * @ignore
@@ -14,14 +15,14 @@ function subscribeActual(observer) {
   let err;
   try {
     result = this.supplier();
-    if (!(result instanceof Observable)) {
+    if (!is(result)) {
       throw new Error('Observable.defer: supplier returned a non-Observable.');
     }
   } catch (e) {
     err = e;
   }
 
-  if (err != null) {
+  if (exists(err)) {
     immediateError(observer, err);
   } else {
     result.subscribeWith({
