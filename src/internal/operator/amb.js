@@ -2,8 +2,9 @@
 /* eslint-disable no-restricted-syntax */
 import { CompositeCancellable } from 'rx-cancellable';
 import Observable from '../../observable';
-import { isIterable, cleanObserver } from '../utils';
+import { isIterable, cleanObserver, isNull } from '../utils';
 import error from './error';
+import is from '../is';
 
 /**
  * @ignore
@@ -24,7 +25,7 @@ function subscribeActual(observer) {
   let winner;
 
   const clean = (o) => {
-    if (winner == null) {
+    if (isNull(winner)) {
       winner = o;
 
       const aborts = controllers.filter(x => x[1] !== o).map(x => x[0]);
@@ -36,7 +37,7 @@ function subscribeActual(observer) {
   };
 
   for (const observable of sources) {
-    if (observable instanceof Observable) {
+    if (is(observable)) {
       observable.subscribeWith({
         onSubscribe(ac) {
           controllers.push([ac, observable]);
