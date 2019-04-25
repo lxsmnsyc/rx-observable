@@ -26,8 +26,9 @@ function subscribeActual(observer) {
       }));
     },
     onNext(x) {
+      const { linked } = controller;
       controller.link(scheduler.schedule(() => {
-        controller.unlink();
+        controller.link(linked);
         onNext(x);
       }));
     },
