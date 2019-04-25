@@ -1,36 +1,44 @@
 /* eslint-disable no-restricted-syntax */
 import { BooleanCancellable } from 'rx-cancellable';
 import Observable from '../../observable';
-import { cleanObserver } from '../utils';
+import { cleanObserver, isNull, immediateComplete } from '../utils';
 
+/**
+ * @ignore
+ */
 function subscribeActual(observer) {
   const {
-    onNext, onError, onComplete, onSubscribe,
+    onNext, onComplete, onError, onSubscribe,
   } = cleanObserver(observer);
 
-  const controller = new BooleanCancellable();
-
   const { values } = this;
+  const { length } = values;
 
-  onSubscribe(controller);
+  if (length === 0) {
+    immediateComplete(observer);
+  } else {
+    const controller = new BooleanCancellable();
 
-  if (controller.cancelled) {
-    return;
-  }
+    onSubscribe(controller);
 
-  for (const x of values) {
-    if (x == null) {
-      onError(new Error('Observable.just: attempt to send null value.'));
+    for (let i = 0; i < length; i += 1) {
+      const item = values[i];
+      if (controller.cancelled) {
+        return;
+      }
+      if (isNull(item)) {
+        onError(new Error('Observable.just: one of the elements is a null value.'));
+        controller.cancel();
+        return;
+      }
+      onNext(item);
+    }
+
+    if (!controller.cancelled) {
+      onComplete();
       controller.cancel();
-      return;
     }
-    if (controller.cancelled) {
-      return;
-    }
-    onNext(x);
   }
-  onComplete();
-  controller.cancel();
 }
 /**
  * @ignore
