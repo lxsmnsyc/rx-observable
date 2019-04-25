@@ -1,10 +1,10 @@
-import Observable from '../../observable';
 import amb from './amb';
+import is from '../is';
 /**
  * @ignore
  */
 export default (source, other) => {
-  if (!(other instanceof Observable)) {
+  if (!is(other)) {
     return source;
   }
   return amb([source, other]);
