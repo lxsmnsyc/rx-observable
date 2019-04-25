@@ -1,6 +1,7 @@
-import Scheduler from 'rx-scheduler';
 import Observable from '../../observable';
-import { cleanObserver, isNumber } from '../utils';
+import {
+  cleanObserver, isNumber, defaultScheduler,
+} from '../utils';
 import error from './error';
 
 /**
@@ -23,13 +24,8 @@ export default (amount, scheduler) => {
   if (!isNumber(amount)) {
     return error(new Error('Observable.timer: "amount" is not a number.'));
   }
-
-  let sched = scheduler;
-  if (!(sched instanceof Scheduler.interface)) {
-    sched = Scheduler.current;
-  }
   const observable = new Observable(subscribeActual);
   observable.amount = amount;
-  observable.scheduler = sched;
+  observable.scheduler = defaultScheduler(scheduler);
   return observable;
 };
