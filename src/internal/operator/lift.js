@@ -1,5 +1,5 @@
 import Observable from '../../observable';
-import { isObserver, immediateError } from '../utils';
+import { isObserver, immediateError, isFunction } from '../utils';
 
 /**
  * @ignore
@@ -25,7 +25,7 @@ function subscribeActual(observer) {
  * @ignore
  */
 export default (source, operator) => {
-  if (typeof operator !== 'function') {
+  if (!isFunction(operator)) {
     return source;
   }
 
