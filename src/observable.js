@@ -1,3 +1,4 @@
+import { LinkedCancellable } from 'rx-cancellable';
 import { isObserver } from './internal/utils';
 
 export default class Observable {
@@ -49,30 +50,14 @@ export default class Observable {
    * @param {?function(x: any)} onError
    * the function you have designed to accept any error
    * notification from the Maybe
-   * @returns {AbortController}
-   * an AbortController reference can request the Maybe to abort.
+   * @returns {Cancellable}
+   * an Cancellable reference can request the Maybe to cancel.
    */
   subscribe(onNext, onComplete, onError) {
-    const controller = new AbortController();
-    let once = false;
+    const controller = new LinkedCancellable();
     this.subscribeWith({
       onSubscribe(ac) {
-        ac.signal.addEventListener('abort', () => {
-          if (!once) {
-            once = true;
-            if (!controller.signal.aborted) {
-              controller.abort();
-            }
-          }
-        });
-        controller.signal.addEventListener('abort', () => {
-          if (!once) {
-            once = true;
-            if (!ac.signal.aborted) {
-              ac.abort();
-            }
-          }
-        });
+        controller.link(ac);
       },
       onComplete,
       onNext,
