@@ -3,9 +3,8 @@ import is from '../is';
 /**
  * @ignore
  */
-export default (source, other) => {
-  if (!is(other)) {
-    return source;
-  }
-  return concatArray([source, other]);
-};
+export default (source, other) => (
+  !is(other)
+    ? source
+    : concatArray([source, other])
+);
