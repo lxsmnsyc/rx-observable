@@ -1,11 +1,10 @@
-import amb from './amb';
 import is from '../is';
+import ambArray from './ambArray';
 /**
  * @ignore
  */
-export default (source, other) => {
-  if (!is(other)) {
-    return source;
-  }
-  return amb([source, other]);
-};
+export default (source, other) => (
+  !is(other)
+    ? source
+    : ambArray([source, other])
+);
