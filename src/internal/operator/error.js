@@ -27,10 +27,10 @@ export default (value) => {
   let report = value;
 
   if (!(isOf(value, Error) || isFunction(value))) {
-    report = new Error('Observable.error received a non-Error value.');
+    report = new Error('Observable.error: received a non-Error value.');
   }
 
-  if (!isFunction(value)) {
+  if (!isFunction(report)) {
     report = toCallable(report);
   }
   const observable = new Observable(subscribeActual);
