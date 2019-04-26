@@ -21,11 +21,11 @@ function subscribeActual(observer) {
       controller.link(ac);
     },
     onNext(x) {
-      const { linked } = controller;
-      controller.link(scheduler.delay(() => {
-        controller.link(linked);
+      const timer = scheduler.delay(() => {
         onNext(x);
-      }, amount));
+      }, amount);
+
+      controller.addEventListener('cancel', () => timer.cancel());
     },
     onComplete() {
       controller.link(scheduler.delay(() => {
