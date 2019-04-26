@@ -44,6 +44,9 @@ function subscribeActual(observer) {
 
     for (let i = 0; i < sources.length; i += 1) {
       const observable = sources[i];
+      if (controller.cancelled) {
+        return;
+      }
       if (is(observable)) {
         observable.subscribeWith({
           onSubscribe(ac) {
