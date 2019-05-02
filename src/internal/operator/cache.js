@@ -14,7 +14,7 @@ function subscribeActual(observer) {
 
   if (!cached) {
     const { length } = observers;
-    observers[length] = observer;
+    observers[length] = cleaned;
 
     const controller = new BooleanCancellable();
 
