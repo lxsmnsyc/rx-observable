@@ -34,7 +34,7 @@ export default class Observable {
 
   /**
    * @desc
-   * Subscribes to a Maybe instance with an onNext
+   * Subscribes to a Observable instance with an onNext
    * and an onError method.
    *
    * onNext receives a non-undefined value.
@@ -43,17 +43,17 @@ export default class Observable {
    * Both are called once.
    * @param {?function(x: any)} onNext
    * the function you have designed to accept the emission
-   * from the Maybe
-   * @param {?function(x: any)} onComplete
-   * the function you have designed to accept the completion
-   * from the Maybe
+   * from the Observable
    * @param {?function(x: any)} onError
    * the function you have designed to accept any error
-   * notification from the Maybe
+   * notification from the Observable
+   * @param {?function(x: any)} onComplete
+   * the function you have designed to accept the completion
+   * from the Observable
    * @returns {Cancellable}
-   * an Cancellable reference can request the Maybe to cancel.
+   * an Cancellable reference can request the Observable to cancel.
    */
-  subscribe(onNext, onComplete, onError) {
+  subscribe(onNext, onError, onComplete) {
     const controller = new LinkedCancellable();
     this.subscribeWith({
       onSubscribe(ac) {
