@@ -1,3 +1,4 @@
+import { LinkedCancellable } from 'rx-cancellable';
 import Observable from '../../observable';
 import { cleanObserver, isFunction, isNull } from '../utils';
 
@@ -9,10 +10,16 @@ function subscribeActual(observer) {
     onNext, onComplete, onError, onSubscribe,
   } = cleanObserver(observer);
 
+  const controller = new LinkedCancellable();
+
+  onSubscribe(controller);
+
   const { mapper } = this;
 
   this.source.subscribeWith({
-    onSubscribe,
+    onSubscribe(c) {
+      controller.link(c);
+    },
     onNext(x) {
       let result;
       try {
@@ -22,6 +29,7 @@ function subscribeActual(observer) {
         }
       } catch (e) {
         onError(e);
+        controller.cancel();
         return;
       }
       onNext(result);
