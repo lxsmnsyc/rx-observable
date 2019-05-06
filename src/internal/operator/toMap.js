@@ -9,11 +9,7 @@ export default (source, keySelector, valueSelector) => new Promise((res, rej) =>
   }
   const result = new Map();
 
-  let mapper = x => x;
-
-  if (isFunction(valueSelector)) {
-    mapper = valueSelector;
-  }
+  const mapper = isFunction(valueSelector) ? valueSelector : x => x;
 
   source.subscribe(
     x => result.set(keySelector(x), mapper(x)),
