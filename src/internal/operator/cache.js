@@ -9,7 +9,7 @@ function subscribeActual(observer) {
   const cleaned = cleanObserver(observer);
 
   const {
-    source, cached, observers, subscribed, cache,
+    source, cached, observers, subscribed, cache, size, error,
   } = this;
 
   if (!cached) {
@@ -30,7 +30,11 @@ function subscribeActual(observer) {
           // not applicable
         },
         onNext: (x) => {
-          cache.push({ type: 'next', value: x });
+          cache.push(x);
+
+          if (size < cache.length) {
+            cache.shift();
+          }
 
           // eslint-disable-next-line no-restricted-syntax
           for (const obs of observers) {
@@ -39,7 +43,6 @@ function subscribeActual(observer) {
         },
         onComplete: () => {
           this.cached = true;
-          cache.push({ type: 'complete' });
 
           // eslint-disable-next-line no-restricted-syntax
           for (const obs of observers) {
@@ -50,7 +53,7 @@ function subscribeActual(observer) {
         },
         onError: (x) => {
           this.cached = true;
-          cache.push({ type: 'error', value: x });
+          this.error = x;
 
           // eslint-disable-next-line no-restricted-syntax
           for (const obs of observers) {
@@ -65,7 +68,7 @@ function subscribeActual(observer) {
         if (controller.cancelled) {
           return;
         }
-        cleaned.onNext(cache[i].value);
+        cleaned.onNext(cache[i]);
       }
     }
   } else {
@@ -76,35 +79,28 @@ function subscribeActual(observer) {
       if (controller.cancelled) {
         return;
       }
-      const signal = cache[i];
-      switch (signal.type) {
-        case 'next':
-          cleaned.onNext(signal.value);
-          break;
-        case 'error':
-          cleaned.onError(signal.value);
-          controller.cancel();
-          break;
-        case 'complete':
-          cleaned.onComplete();
-          controller.cancel();
-          break;
-        default:
-          break;
-      }
+      cleaned.onNext(cache[i]);
     }
+
+    if (error) {
+      cleaned.onError(error);
+    } else {
+      cleaned.onComplete();
+    }
+    controller.cancel();
   }
 }
 
 /**
  * @ignore
  */
-export default (source) => {
+export default (source, size) => {
   const observable = new Observable(subscribeActual);
   observable.source = source;
   observable.cached = false;
   observable.cache = [];
   observable.subscribed = false;
   observable.observers = [];
+  observable.size = size;
   return observable;
 };
