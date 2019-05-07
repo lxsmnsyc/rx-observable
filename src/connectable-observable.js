@@ -11,9 +11,15 @@ import { autoConnect, refCount } from './internal/operators';
  * begins emitting items.
  */
 export default class ConnectableObservable extends Observable {
+  /**
+   * @ignore
+   */
   constructor(subscribeActual, connectActual) {
     super(subscribeActual);
 
+    /**
+     * @ignore
+     */
     this.connectActual = connectActual;
   }
 
