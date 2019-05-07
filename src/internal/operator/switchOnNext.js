@@ -4,6 +4,9 @@ import error from './error';
 import Observable from '../../observable';
 import { cleanObserver } from '../utils';
 
+/**
+ * @ignore
+ */
 function subscribeActual(observer) {
   const {
     onSubscribe, onNext, onError, onComplete,
@@ -56,6 +59,9 @@ function subscribeActual(observer) {
   });
 }
 
+/**
+ * @ignore
+ */
 export default (source) => {
   if (!is(source)) {
     return error(new Error('Observable.switchOnNext: source is not an Observable.'));
