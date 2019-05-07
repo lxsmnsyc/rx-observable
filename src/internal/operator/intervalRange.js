@@ -3,6 +3,9 @@ import { isNumber, defaultScheduler, cleanObserver } from '../utils';
 import error from './error';
 import Observable from '../../observable';
 
+/**
+ * @ignore
+ */
 const { sign } = Math;
 
 /**
