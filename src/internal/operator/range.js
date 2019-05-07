@@ -4,8 +4,14 @@ import Observable from '../../observable';
 import { cleanObserver, isNumber } from '../utils';
 import error from './error';
 
+/**
+ * @ignore
+ */
 const { sign } = Math;
 
+/**
+ * @ignore
+ */
 function subscribeActual(observer) {
   const {
     onNext, onComplete, onSubscribe,
