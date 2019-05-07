@@ -5,6 +5,9 @@ import { cleanObserver, isIterable } from '../utils';
 import error from './error';
 import is from '../is';
 
+/**
+ * @ignore
+ */
 function subscribeActual(observer) {
   const {
     onSubscribe, onNext, onError, onComplete,
