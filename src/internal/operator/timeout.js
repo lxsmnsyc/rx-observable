@@ -16,15 +16,9 @@ function subscribeActual(observer) {
 
   onSubscribe(controller);
 
-  const timeout = scheduler.delay(
-    () => {
-      onError(new Error('Observable.timeout: TimeoutException (no success signals within the specified timeout).'));
-      controller.cancel();
-    },
-    amount,
-  );
+  let timeout;
 
-  controller.addEventListener('cancel', () => timeout.cancel());
+  controller.addEventListener('cancel', () => timeout && timeout.cancel());
 
   this.source.subscribeWith({
     onSubscribe(ac) {
@@ -35,6 +29,13 @@ function subscribeActual(observer) {
     onNext(x) {
       if (!timeout.cancelled) {
         timeout.cancel();
+        timeout = scheduler.delay(
+          () => {
+            onError(new Error('Observable.timeout: TimeoutException (no success signals within the specified timeout).'));
+            controller.cancel();
+          },
+          amount,
+        );
       }
       onNext(x);
     },
