@@ -56,12 +56,12 @@
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.17.2",
     "mocha": "^6.1.4",
-    "nyc": "^13.3.0",
+    "nyc": "^14.1.0",
     "rollup": "^1.11.3",
     "terser": "^3.17.0"
   },
   "dependencies": {
     "rx-cancellable": "^0.3.2",
-    "rx-scheduler": "^0.2.7"
+    "rx-scheduler": "^0.2.8"
   }
 }
