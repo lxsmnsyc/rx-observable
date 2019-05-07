@@ -14,12 +14,12 @@ export default class Observer {
   onSubscribe(d) {}
 
   /**
-   * Receives a success value.
+   * Receives a value.
    * @param {!any} value
    * @abstract
    */
   // eslint-disable-next-line class-methods-use-this, no-unused-vars
-  onSuccess(value) {}
+  onNext(value) {}
 
 
   /**
