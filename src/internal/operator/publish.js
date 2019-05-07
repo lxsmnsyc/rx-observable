@@ -6,10 +6,18 @@ import ConnectableObservable from '../../connectable-observable';
  * @ignore
  */
 function connectActual(consumer) {
-  const { controller, observers } = this;
+  const { controllers, observers } = this;
 
   if (!this.connected) {
     this.connected = true;
+
+    const controller = new CompositeCancellable();
+
+    for (let i = 0; i < controllers; i += 1) {
+      controller.add(controllers[i]);
+    }
+
+    consumer(controller);
 
     this.source.subscribeWith({
       onSubscribe(c) {
@@ -34,8 +42,6 @@ function connectActual(consumer) {
       },
     });
   }
-
-  consumer(controller);
 }
 /**
  * @ignore
@@ -57,7 +63,7 @@ function subscribeActual(observer) {
     }
   });
 
-  this.controller.add(controller);
+  this.controllers.push(controller);
 
   cleaned.onSubscribe(controller);
 }
@@ -69,6 +75,6 @@ export default (source) => {
   observable.source = source;
   observable.observers = [];
   observable.connected = false;
-  observable.controller = new CompositeCancellable();
+  observable.controllers = [];
   return observable;
 };
