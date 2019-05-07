@@ -1,5 +1,7 @@
 import Observable from '../../observable';
 import { cleanObserver, isFunction } from '../utils';
+import doOnSubscribe from './doOnSubscribe';
+import doOnCancel from './doOnCancel';
 
 /**
  * @ignore
@@ -9,12 +11,12 @@ function subscribeActual(observer) {
     onSuccess, onError, onSubscribe,
   } = cleanObserver(observer);
 
-  const { source, callable } = this;
+  const { source, onStart, onEnd } = this;
 
   source.subscribeWith({
     onSubscribe(d) {
-      d.addEventListener('cancel', callable);
-      callable(d);
+      d.addEventListener('cancel', onEnd);
+      onStart(d);
       onSubscribe(d);
     },
     onSuccess,
@@ -25,12 +27,20 @@ function subscribeActual(observer) {
 /**
  * @ignore
  */
-export default (source, callable) => {
-  if (!isFunction(callable)) {
-    return source;
+export default (source, onStart, onEnd) => {
+  const IS = isFunction(onStart);
+  const IE = isFunction(onEnd);
+  if (IS && IE) {
+    const observable = new Observable(subscribeActual);
+    observable.onStart = onStart;
+    observable.onEnd = onEnd;
+    return observable;
   }
-  const observable = new Observable(subscribeActual);
-  observable.source = source;
-  observable.callable = callable;
-  return observable;
+  if (IS) {
+    return doOnSubscribe(source, onStart);
+  }
+  if (IE) {
+    return doOnCancel(source, onEnd);
+  }
+  return source;
 };
