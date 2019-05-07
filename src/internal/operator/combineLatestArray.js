@@ -1,6 +1,8 @@
 /* eslint-disable no-loop-func */
 import { CompositeCancellable } from 'rx-cancellable';
-import { isArray, isFunction, immediateError } from '../utils';
+import {
+  isArray, isFunction, immediateError, cleanObserver, isNull,
+} from '../utils';
 import error from './error';
 import Observable from '../../observable';
 import is from '../is';
@@ -15,7 +17,7 @@ const defaultCombiner = x => x;
 function subscribeActual(observer) {
   const {
     onSubscribe, onNext, onError, onComplete,
-  } = observer;
+  } = cleanObserver(observer);
 
   const { sources, combiner } = this;
   const { length } = sources;
@@ -26,26 +28,42 @@ function subscribeActual(observer) {
     const controller = new CompositeCancellable();
     onSubscribe(controller);
 
-    let pendingNext = length;
     let pendingComplete = length;
 
+    const ready = [];
+
+    let allReady;
+
+    const check = () => {
+      if (!allReady) {
+        for (let i = 0; i < length; i += 1) {
+          if (!ready[i]) {
+            return false;
+          }
+        }
+        allReady = true;
+      }
+      return allReady;
+    };
+
     const buffer = [];
-    for (let i = 0; i < sources.length; i += 1) {
+
+    for (let i = 0; i < length; i += 1) {
       const observable = sources[i];
       if (controller.cancelled) {
         return;
       }
       if (is(observable)) {
+        buffer[i] = [];
         observable.subscribeWith({
           onSubscribe(ac) {
             controller.add(ac);
           },
           onComplete() {
+            pendingComplete -= 1;
             if (pendingComplete === 0) {
               onComplete();
               controller.cancel();
-            } else {
-              pendingComplete -= 1;
             }
           },
           onError(x) {
@@ -55,16 +73,28 @@ function subscribeActual(observer) {
           onNext(x) {
             buffer[i] = x;
 
-            if (pendingNext > 0) {
-              pendingNext -= 1;
-            }
-            if (pendingNext === 0) {
-              onNext(combiner(buffer));
+            ready[i] = true;
+
+            if (check()) {
+              let result;
+
+              try {
+                result = combiner(buffer);
+
+                if (isNull(result)) {
+                  throw new Error('Observable.combineLatestArray: combiner function returned a null.');
+                }
+              } catch (e) {
+                onError(e);
+                controller.cancel();
+                return;
+              }
+              onNext(result);
             }
           },
         });
       } else {
-        onError(new Error('Observable.ambArray: One of the sources is a non-Observable.'));
+        onError(new Error('Observable.combineLatestArray: One of the sources is a non-Observable.'));
         controller.cancel();
         break;
       }
