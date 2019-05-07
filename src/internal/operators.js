@@ -1,2 +1,16 @@
+export { default as amb } from './operator/amb';
+export { default as ambArray } from './operator/ambArray';
+export { default as ambWith } from './operator/ambWith';
 export { default as autoConnect } from './operator/autoConnect';
+export { default as cache } from './operator/cache';
+export { default as combineLatest } from './operator/combineLatest';
+export { default as combineLatestArray } from './operator/combineLatestArray';
+export { default as combineLatestWith } from './operator/combineLatestWith';
+export { default as compose } from './operator/compose';
+export { default as concat } from './operator/concat';
+export { default as concatArray } from './operator/concatArray';
+export { default as concatMap } from './operator/concatMap';
+export { default as concatWith } from './operator/concatWith';
+export { default as create } from './operator/create';
+export { default as debounce } from './operator/debounce';
 export { default as refCount } from './operator/refCount';
