@@ -3,6 +3,9 @@ import Observable from '../../observable';
 import { isNumber, cleanObserver, defaultScheduler } from '../utils';
 
 
+/**
+ * @ignore
+ */
 function subscribeActual(observer) {
   const {
     onSubscribe, onNext, onError, onComplete,
@@ -32,6 +35,9 @@ function subscribeActual(observer) {
   });
 }
 
+/**
+ * @ignore
+ */
 export default (source, amount, scheduler) => {
   if (!isNumber(amount)) {
     return source;
