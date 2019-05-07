@@ -42,7 +42,7 @@ function subscribeActual(observer) {
       }
     };
 
-    for (let i = 0; i < sources.length; i += 1) {
+    for (let i = 0; i < length; i += 1) {
       const observable = sources[i];
       if (controller.cancelled) {
         return;
