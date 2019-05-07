@@ -33,6 +33,7 @@ function subscribeActual(observer) {
         }
       } catch (e) {
         onError(e);
+        controller.cancel();
         return;
       }
       controller.unlink();
@@ -45,11 +46,11 @@ function subscribeActual(observer) {
           currentStream = c;
         },
         onComplete() {
+          currentStream = null;
           if (origin.cancelled) {
             onComplete();
           } else {
             controller.link(origin);
-            currentStream = null;
           }
         },
         onError,
