@@ -17,6 +17,9 @@ import { isOf, isNull } from './internal/utils';
  */
 // eslint-disable-next-line no-unused-vars
 export default class ObservableEmitter extends Cancellable {
+  /**
+   * @ignore
+   */
   constructor(next, complete, error) {
     super();
     /**
