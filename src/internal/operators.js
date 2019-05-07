@@ -1,7 +1,11 @@
+/* eslint-disable import/no-cycle */
 export { default as amb } from './operator/amb';
 export { default as ambArray } from './operator/ambArray';
 export { default as ambWith } from './operator/ambWith';
 export { default as autoConnect } from './operator/autoConnect';
+export { default as bufferCount } from './operator/bufferCount';
+export { default as bufferTimed } from './operator/bufferTimed';
+export { default as bufferWith } from './operator/bufferWith';
 export { default as cache } from './operator/cache';
 export { default as combineLatest } from './operator/combineLatest';
 export { default as combineLatestArray } from './operator/combineLatestArray';
