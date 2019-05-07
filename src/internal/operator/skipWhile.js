@@ -3,6 +3,9 @@ import Observable from '../../observable';
 import { cleanObserver, isFunction } from '../utils';
 
 
+/**
+ * @ignore
+ */
 function subscribeActual(observer) {
   const {
     onSubscribe, onNext, onError, onComplete,
