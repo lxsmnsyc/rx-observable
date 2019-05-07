@@ -2,6 +2,9 @@ import { LinkedCancellable } from 'rx-cancellable';
 import Observable from '../../observable';
 import { cleanObserver, defaultScheduler } from '../utils';
 
+/**
+ * @ignore
+ */
 function subscribeActual(observer) {
   const {
     onNext, onComplete, onError, onSubscribe,
