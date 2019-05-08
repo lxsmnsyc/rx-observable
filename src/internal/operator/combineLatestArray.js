@@ -1,7 +1,7 @@
 /* eslint-disable no-loop-func */
 import { CompositeCancellable } from 'rx-cancellable';
 import {
-  isArray, isFunction, immediateError, cleanObserver, isNull,
+  isArray, isFunction, cleanObserver, isNull, immediateComplete,
 } from '../utils';
 import error from './error';
 import Observable from '../../observable';
@@ -23,7 +23,7 @@ function subscribeActual(observer) {
   const { length } = sources;
 
   if (length === 0) {
-    immediateError(new Error('Observable.combineLatestArray: sources is not empty.'));
+    immediateComplete(observer);
   } else {
     const controller = new CompositeCancellable();
     onSubscribe(controller);
