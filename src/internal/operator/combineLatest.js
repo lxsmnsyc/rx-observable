@@ -7,7 +7,7 @@ import combineLatestArray from './combineLatestArray';
 /**
  * @ignore
  */
-export default (sources) => {
+export default (sources, combiner) => {
   if (!isIterable(sources)) {
     return error(new Error('Observable.combineLatest: sources is a non-Iterable.'));
   }
@@ -21,5 +21,5 @@ export default (sources) => {
     }
   }
 
-  return combineLatestArray(result);
+  return combineLatestArray(result, combiner);
 };
