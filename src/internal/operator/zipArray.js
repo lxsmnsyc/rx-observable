@@ -23,7 +23,7 @@ function subscribeActual(observer) {
   const { length } = sources;
 
   if (length === 0) {
-    immediateError(new Error('Observable.combineLatestArray: sources is not empty.'));
+    immediateError(observer, new Error('Observable.combineLatestArray: sources is not empty.'));
   } else {
     const controller = new CompositeCancellable();
     onSubscribe(controller);
