@@ -3,8 +3,8 @@ import combineLatestArray from './combineLatestArray';
 /**
  * @ignore
  */
-export default (source, other) => (
+export default (source, other, combiner) => (
   !is(other)
     ? source
-    : combineLatestArray([source, other])
+    : combineLatestArray([source, other], combiner)
 );
